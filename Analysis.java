@@ -16,13 +16,13 @@ public class Analysis {
     public static char buffer;//存储回退的字符
     //main
     public static void main(String[] args) throws IOException {
-//        //从本地文件中读取测试
-//        File file = new File("C:\\Users\\40535\\Desktop\\大三下学期\\编译原理\\作业\\test.txt");
-//        BufferedReader input = new BufferedReader(new FileReader(file));
+        //从本地文件中读取测试
+        File file = new File("C:\\Users\\40535\\Desktop\\大三下学期\\编译原理\\作业\\test.txt");
+        BufferedReader input = new BufferedReader(new FileReader(file));
 
-        //正式
-        String name = args[0];
-        BufferedReader input = new BufferedReader(new FileReader(name));
+//        //正式
+//        String name = args[0];
+//        BufferedReader input = new BufferedReader(new FileReader(name));
         //getChar
         c = input.read();
         word = (char)c;
@@ -55,9 +55,6 @@ public class Analysis {
                     word = (char)c;
                     buffer = word;
                 }
-                if(c == -1){
-                    break;
-                }
                 retract(word);
                 int resultValue = reserver();
                 //标识符
@@ -67,6 +64,9 @@ public class Analysis {
                 //保留字
                 else {
                     System.out.println(reservedOutput[resultValue]);
+                }
+                if(c == -1){
+                    break;
                 }
                 continue;
             }
@@ -82,20 +82,17 @@ public class Analysis {
                     word = (char)c;
                     buffer = word;
                 }
-                if(c == -1){
-                    break;
-                }
                 retract(word);
                 int num = transNum(token);
                 System.out.println("Int(" + num + ")");
+                if(c == -1){
+                    break;
+                }
                 continue;
             }
             else if(isColon(word)){
                 //getChar
                 c = input.read();
-                if(c == -1){
-                    break;
-                }
                 word = (char)c;
                 buffer = word;
                 //判断是否是赋值符号
@@ -103,7 +100,11 @@ public class Analysis {
                     System.out.println("Assign");
                 }
                 else{
+                    retract(word);
                     System.out.println("Colon");
+                }
+                if(c == -1){
+                    break;
                 }
                 continue;
             }
