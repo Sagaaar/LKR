@@ -23,10 +23,12 @@ public class Analysis {
         //正式
         String name = args[0];
         BufferedReader input = new BufferedReader(new FileReader(name));
-
-        while((c = input.read()) != -1){
-            word = (char)c;
-            buffer = word;
+        //getChar
+        c = input.read();
+        word = (char)c;
+        buffer = word;
+        while(true){
+            token.setLength(0);
             //跳过空格、换行、Tab读取下一个字符
             while(isSpace(word) || isNewLine(word) || isTab(word) || isEnter(word)){
                 //getChar
@@ -53,9 +55,9 @@ public class Analysis {
                     word = (char)c;
                     buffer = word;
                 }
-//                if(c == -1){
-//                    break;
-//                }
+                if(c == -1){
+                    break;
+                }
                 retract(word);
                 int resultValue = reserver();
                 //标识符
@@ -63,10 +65,10 @@ public class Analysis {
                     System.out.println("Ident(" + token.toString() + ")");
                 }
                 //保留字
-                else{
+                else {
                     System.out.println(reservedOutput[resultValue]);
                 }
-                token.setLength(0);
+                continue;
             }
             //判断当前字符是否是数字开头
             else if(isDigital(word)){
@@ -80,13 +82,13 @@ public class Analysis {
                     word = (char)c;
                     buffer = word;
                 }
-//                if(c == -1){
-//                    break;
-//                }
+                if(c == -1){
+                    break;
+                }
                 retract(word);
                 int num = transNum(token);
                 System.out.println("Int(" + num + ")");
-                token.setLength(0);
+                continue;
             }
             else if(isColon(word)){
                 //getChar
@@ -103,6 +105,7 @@ public class Analysis {
                 else{
                     System.out.println("Colon");
                 }
+                continue;
             }
             //判断是否是加号
             else if(isPlus(word)){
@@ -127,6 +130,12 @@ public class Analysis {
             else{
                 System.out.println("Unknown");
             }
+            c = input.read();
+            if(c == -1){
+                break;
+            }
+            word = (char)c;
+            buffer = word;
         }
     }
     //字符转换成数字
