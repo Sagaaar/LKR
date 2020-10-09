@@ -102,11 +102,12 @@ public class Analysis {
                 else{
                     retract(word);
                     System.out.println("Colon");
+                    continue;
                 }
                 if(c == -1){
                     break;
                 }
-                continue;
+
             }
             //判断是否是加号
             else if(isPlus(word)){
