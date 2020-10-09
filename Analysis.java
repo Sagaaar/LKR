@@ -131,6 +131,8 @@ public class Analysis {
             }
             else{
                 System.out.println("Unknown");
+                //程序终止不再往下分析
+                break;
             }
             c = input.read();
             if(c == -1){
