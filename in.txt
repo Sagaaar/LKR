@@ -1,0 +1,8 @@
+begin
+    const a=1;
+    var b = 214748364;
+    var c;
+    b=213;
+    c=a+b;
+    print(c);
+end
