@@ -1,6 +1,10 @@
-# gradle 好大
-FROM gradle:jdk14
-WORKDIR /app
-COPY build.gradle gradle settings.gradle miniplc0-java.iml /app/
-COPY src /app/src
-RUN gradle fatjar --no-daemon
+# -- Dockerfile --
+# 这个文件负责构建包含你的程序的 Docker 容器
+
+# 使用 Java 12
+FROM openjdk:12
+# 编译程序
+WORKDIR /app/
+# 向容器内复制文件
+COPY src ./src
+RUN javac -sourcepath src ./src/Analyze.java -Xlint:unchecked -d ./
