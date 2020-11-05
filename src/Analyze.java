@@ -134,7 +134,7 @@ class analyser {
     analyser() {
         map = new HashMap<Character, Integer>();
         map.put('+', 0);
-        map.put('*', 0);
+        map.put('*', 1);
         map.put('i', 2);
         map.put('(', 3);
         map.put(')', 4);
