@@ -94,7 +94,7 @@ public class Analyze {
                     }
                 }
                 else if(snow == '('){
-                    System.out.println("RE");
+                    System.out.println("E");
                     break;
                 }
                 else if(snow == ')'){
