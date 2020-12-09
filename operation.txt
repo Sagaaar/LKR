@@ -1,0 +1,5 @@
+gradle fatjar
+词法分析
+java -jar ./build/libs/miniplc0java.jar -t -o out.txt in.txt
+语法分析
+java -jar ./build/libs/miniplc0java.jar -l -o out.txt in.txt
