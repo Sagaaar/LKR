@@ -63,6 +63,7 @@ public final class Analyser {
             do{
                 peekedToken = tokenizer.nextToken();
             }while(peekedToken.getTokenType().equals(TokenType.COMMENT));
+            System.out.println(peekedToken);
         }
         return peekedToken;
     }
@@ -305,7 +306,7 @@ public final class Analyser {
         expect(TokenType.ASSIGN);
         exprToken[callFuncP].clear();
         analyseExpr();
-        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         
         expect(TokenType.SEMICOLON);
         varTop = stackLeft[leftP];
@@ -581,7 +582,7 @@ public final class Analyser {
             expect(TokenType.ASSIGN);
             exprToken[callFuncP].clear();
             analyseExpr();
-            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
             
             isInitialized = true;
         }
@@ -714,7 +715,7 @@ public final class Analyser {
     private void analyseExprStmt() throws CompileError{
         exprToken[callFuncP].clear();
         analyseExpr();
-        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         expect(TokenType.SEMICOLON);
     }
 
@@ -734,7 +735,7 @@ public final class Analyser {
         if(!check(TokenType.SEMICOLON)) {
             exprToken[callFuncP].clear();
             analyseExpr();
-            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
             if(currentFunc.returnType != 1){
                 throw new AnalyzeError(ErrorCode.InvalidReturnType, token.getStartPos());
             }
@@ -755,7 +756,7 @@ public final class Analyser {
         expect(TokenType.WHILE_KW);
         exprToken[callFuncP].clear();
         analyseExpr();
-        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         analyseBlockStmt();
     }
 
@@ -766,7 +767,7 @@ public final class Analyser {
         expect(TokenType.IF_KW);
         exprToken[callFuncP].clear();
         analyseExpr();
-        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         analyseBlockStmt();
         while (check(TokenType.ELSE_KW)){
             expect(TokenType.ELSE_KW);
@@ -774,7 +775,7 @@ public final class Analyser {
                 expect(TokenType.IF_KW);
                 exprToken[callFuncP].clear();
                 analyseExpr();
-                debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+//                debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
                 analyseBlockStmt();
             }
             else{
