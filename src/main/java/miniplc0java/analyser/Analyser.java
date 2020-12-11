@@ -469,6 +469,7 @@ public final class Analyser {
      * call_expr -> IDENT '(' call_param_list? ')'
      * ident_expr -> IDENT
      */
+    Boolean checkIsFirstAssign = true;
     private boolean analyseAssignOrCallOrIdentExpr() throws CompileError{
         if(check(TokenType.IDENT)){
             //全局寻找引用
@@ -510,8 +511,13 @@ public final class Analyser {
                 }
                 tmp.isInitialized = true;
                 expect(TokenType.ASSIGN);
+                if(checkIsFirstAssign == false){
+                    throw new AnalyzeError(ErrorCode.InvalidAssignment, token.getStartPos());
+                }
+                checkIsFirstAssign = false;
                 exprToken[callFuncP].clear();
                 analyseExpr();
+                checkIsFirstAssign = true;
                 return true;
             }
             //ident_expr -> IDENT
@@ -797,6 +803,7 @@ public final class Analyser {
             }
             else{
                 analyseBlockStmt();
+                break;
             }
         }
     }
