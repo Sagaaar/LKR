@@ -29,6 +29,7 @@ public final class Analyser {
     int cntParam = 0;
     int cntLocal = 0;
     Map<String, Function> funcMap = new HashMap<String, Function>();
+    int checkExprType = 0;
 
     /** 当前偷看的 token */
     Token peekedToken = null;
@@ -256,6 +257,14 @@ public final class Analyser {
         stackLeft[++leftP] = new StackVar(true,true,"putln",2, new TypeAndPos(1,7));
         stackLeft[++leftP] = new StackVar(true,true,"_start",2, new TypeAndPos(1,8));
         funcList[++funcP] = new Function(0,8,0,2,0, false);
+        funcMap.put("getint",new Function(0,0,0,1,-1,true));
+        funcMap.put("getdouble",new Function(0,1,0,3,-1,true));
+        funcMap.put("getchar",new Function(0,2,0,1,-1,true));
+        funcMap.put("putint",new Function(1,3,0,2,-1,true));
+        funcMap.put("putdouble",new Function(1,4,0,2,-1,true));
+        funcMap.put("putchar",new Function(1,5,0,2,-1,true));
+        funcMap.put("putstr",new Function(1,6,0,2,-1,true));
+        funcMap.put("putln",new Function(0,7,0,2,-1,true));
     }
 
     /**
@@ -303,6 +312,7 @@ public final class Analyser {
         addSymbol(token.getValueString(),true,true,token.getStartPos(),1, typeAndPos);
         expect(TokenType.COLON);
         int varType = analyseTyParam();
+        checkExprType = varType;
         expect(TokenType.ASSIGN);
         exprToken[callFuncP].clear();
         analyseExpr();
@@ -473,6 +483,9 @@ public final class Analyser {
             if(check(TokenType.L_PAREN)){
                 //栈增
                 Function function = funcMap.get(token.getValueString());
+                if(checkExprType!=-1&&checkExprType != function.returnType){
+                    throw new AnalyzeError(ErrorCode.InvalidReturnType,token.getStartPos());
+                }
                 callFunc tmpFunc=new callFunc(ExpressionType.FUNC, function);
                 exprToken[callFuncP].add(tmpFunc);
                 callFuncs[++callFuncP] = tmpFunc;
@@ -490,6 +503,7 @@ public final class Analyser {
             }
             //assign_expr -> l_expr '=' expr
             else if(check(TokenType.ASSIGN)){
+                checkExprType = tmp.type;
                 //常量不能被赋值
                 if(tmp.isConst){
                     throw new AnalyzeError(ErrorCode.AssignToConstant, token.getStartPos());
@@ -578,6 +592,7 @@ public final class Analyser {
         addSymbol(token.getValueString(),false,false,token.getStartPos(),1, typeAndPos);
         expect(TokenType.COLON);
         int varType = analyseTyParam();
+        checkExprType = varType;
         if(!check(TokenType.SEMICOLON)) {
             expect(TokenType.ASSIGN);
             exprToken[callFuncP].clear();
@@ -612,6 +627,7 @@ public final class Analyser {
         cntParam = 0;
         cntLocal = 0;
         funcList[++funcP] = new Function(0,leftP,0,0,funcP, false);
+        funcMap.put(token.getValueString(),funcList[funcP]);
         currentFunc = funcList[funcP];
         expect(TokenType.L_PAREN);
         //新建一个局部栈
@@ -714,6 +730,7 @@ public final class Analyser {
      */
     private void analyseExprStmt() throws CompileError{
         exprToken[callFuncP].clear();
+        checkExprType=-1;
         analyseExpr();
 //        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         expect(TokenType.SEMICOLON);
