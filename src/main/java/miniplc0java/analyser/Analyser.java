@@ -45,9 +45,10 @@ public final class Analyser {
     }
 
     public List<Instruction> analyse() throws CompileError {
+        exprToken[++callFuncP] = new ArrayList<>();
         initialStack();
         analyseProgram();
-        debug_print.print_stack(leftP, rightP, stackLeft, stackRight);
+//        debug_print.print_stack(leftP, rightP, stackLeft, stackRight);
         return instructions;
     }
 
@@ -302,13 +303,19 @@ public final class Analyser {
         expect(TokenType.COLON);
         int varType = analyseTyParam();
         expect(TokenType.ASSIGN);
+        exprToken[callFuncP].clear();
         analyseExpr();
+        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+        
         expect(TokenType.SEMICOLON);
         varTop = stackLeft[leftP];
         varTop.type = varType;
     }
 
     //-------------------------------------表达式-----------------------------------
+    callFunc[] callFuncs = new callFunc[1000];
+    ArrayList[] exprToken = new ArrayList[1000];
+    int callFuncP = -1;
     /**
      * expr ->
      *       operator_expr (expr)
@@ -352,7 +359,9 @@ public final class Analyser {
             //operator_expr -> expr binary_operator expr
            else{
                if(analyseBinaryOperator()) {
+                   
                    analyseExpr();
+                   
                }
             }
         }
@@ -365,51 +374,61 @@ public final class Analyser {
         // *
         if(check(TokenType.MUL)){
             expect(TokenType.MUL);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.MUL));
             return true;
         }
         // -
         else if(check(TokenType.MINUS)){
             expect(TokenType.MINUS);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.MINUS));
             return true;
         }
         // +
         else if(check(TokenType.PLUS)){
             expect(TokenType.PLUS);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.PLUS));
             return true;
         }
         // /
         else if(check(TokenType.DIV)){
             expect(TokenType.DIV);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.DIV));
             return true;
         }
         // ==
         else if(check(TokenType.EQ)){
             expect(TokenType.EQ);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.EQ));
             return true;
         }
         // !=
         else if(check(TokenType.NEQ)){
             expect(TokenType.NEQ);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.NEQ));
             return true;
         }
         // <
         else if(check(TokenType.LT)){
             expect(TokenType.LT);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.LT));
             return true;
         }
         // >
         else if(check(TokenType.GT)){
             expect(TokenType.GT);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.GT));
             return true;
         }
         // <=
         else if(check(TokenType.LE)){
             expect(TokenType.LE);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.LE));
             return true;
         }
         // >=
         else if(check(TokenType.GE)){
             expect(TokenType.GE);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.GE));
             return true;
         }
         else{
@@ -423,8 +442,10 @@ public final class Analyser {
     private boolean analyseGroupExpr() throws CompileError{
         if(check(TokenType.L_PAREN)) {
             expect(TokenType.L_PAREN);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.L_PAREN));
             analyseExpr();
             expect(TokenType.R_PAREN);
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.R_PAREN));
             return true;
         }
         return false;
@@ -442,17 +463,28 @@ public final class Analyser {
             //全局寻找引用
             Token token = expect(TokenType.IDENT);
             StackVar tmp = stackAll(token.getValueString());
+
             //引用没有放在符号表中
             if (tmp == null) {
                 throw new AnalyzeError(ErrorCode.NotDeclared, token.getStartPos());
             }
             //call_expr -> IDENT '(' call_param_list? ')'
             if(check(TokenType.L_PAREN)){
+                //栈增
+                Function function = funcMap.get(token.getValueString());
+                callFunc tmpFunc=new callFunc(ExpressionType.FUNC, function);
+                exprToken[callFuncP].add(tmpFunc);
+                callFuncs[++callFuncP] = tmpFunc;
+                exprToken[callFuncP] = new ArrayList<ExpressionToken>();
+
                 expect(TokenType.L_PAREN);
                 if(!check(TokenType.R_PAREN)) {
                     analyseCallParamList();
                 }
                 expect(TokenType.R_PAREN);
+                //栈减
+                callFuncP--;
+
                 return true;
             }
             //assign_expr -> l_expr '=' expr
@@ -463,11 +495,13 @@ public final class Analyser {
                 }
                 tmp.isInitialized = true;
                 expect(TokenType.ASSIGN);
+                exprToken[callFuncP].clear();
                 analyseExpr();
                 return true;
             }
             //ident_expr -> IDENT
             else{
+                exprToken[callFuncP].add(new Var(ExpressionType.Var,tmp));
                 //等号右边的INDENT必须已经初始化
                 if(!tmp.isInitialized){
                     throw new AnalyzeError(ErrorCode.NotInitialized, token.getStartPos());
@@ -484,7 +518,8 @@ public final class Analyser {
     private boolean analyseLiteralExpr() throws CompileError{
         //UINT_LITERAL
         if(check(TokenType.UINT_LITERAL)){
-            expect(TokenType.UINT_LITERAL);
+            Token token = expect(TokenType.UINT_LITERAL);
+            exprToken[callFuncP].add(new Uinteger(ExpressionType.UINT_LITERAL, (int)token.getValue()));
             return true;
         }
         //STRING_LITERAL
@@ -501,9 +536,12 @@ public final class Analyser {
      */
     private void analyseCallParamList() throws CompileError{
         analyseExpr();
+        callFuncs[callFuncP].addParam(MidToLast.midToLast(exprToken[callFuncP]));
         while(check(TokenType.COMMA)){
             expect(TokenType.COMMA);
+            exprToken[callFuncP].clear();
             analyseExpr();
+            callFuncs[callFuncP].addParam(MidToLast.midToLast(exprToken[callFuncP]));
         }
     }
 
@@ -512,6 +550,7 @@ public final class Analyser {
      */
     private boolean analyseNegateExpr() throws CompileError{
         if(check(TokenType.MINUS)){
+            exprToken[callFuncP].add(new ExpressionToken(ExpressionType.NEG));
             expect(TokenType.MINUS);
             analyseExpr();
             return true;
@@ -540,7 +579,10 @@ public final class Analyser {
         int varType = analyseTyParam();
         if(!check(TokenType.SEMICOLON)) {
             expect(TokenType.ASSIGN);
+            exprToken[callFuncP].clear();
             analyseExpr();
+            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
+            
             isInitialized = true;
         }
         expect(TokenType.SEMICOLON);
@@ -587,7 +629,8 @@ public final class Analyser {
         currentFunc.localNum = cntLocal;
         varTop = stackLeft[leftP];
         varTop.type = varType;
-
+        //退回start
+        currentFunc = funcList[0];
     }
 
     /**
@@ -616,7 +659,7 @@ public final class Analyser {
         }
         expect(TokenType.R_BRACE);
         //弹出局部栈
-        debug_print.print_current_stack(leftP, rightP, stackLeft, stackRight);
+//        debug_print.print_current_stack(leftP, rightP, stackLeft, stackRight);
         leftP = stackRight[rightP].Value - 1;
         rightP--;
     }
@@ -669,7 +712,9 @@ public final class Analyser {
      * expr_stmt -> expr ';'
      */
     private void analyseExprStmt() throws CompileError{
+        exprToken[callFuncP].clear();
         analyseExpr();
+        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         expect(TokenType.SEMICOLON);
     }
 
@@ -687,7 +732,9 @@ public final class Analyser {
         Token token = expect(TokenType.RETURN_KW);
         //如果有表达式
         if(!check(TokenType.SEMICOLON)) {
+            exprToken[callFuncP].clear();
             analyseExpr();
+            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
             if(currentFunc.returnType != 1){
                 throw new AnalyzeError(ErrorCode.InvalidReturnType, token.getStartPos());
             }
@@ -706,7 +753,9 @@ public final class Analyser {
      */
     private void analyseWhileStmt() throws CompileError{
         expect(TokenType.WHILE_KW);
-        analyseExpr();;
+        exprToken[callFuncP].clear();
+        analyseExpr();
+        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         analyseBlockStmt();
     }
 
@@ -715,13 +764,17 @@ public final class Analyser {
      */
     private void analyseIFStmt() throws CompileError {
         expect(TokenType.IF_KW);
+        exprToken[callFuncP].clear();
         analyseExpr();
+        debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
         analyseBlockStmt();
         while (check(TokenType.ELSE_KW)){
             expect(TokenType.ELSE_KW);
             if(check(TokenType.IF_KW)) {
                 expect(TokenType.IF_KW);
+                exprToken[callFuncP].clear();
                 analyseExpr();
+                debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
                 analyseBlockStmt();
             }
             else{
