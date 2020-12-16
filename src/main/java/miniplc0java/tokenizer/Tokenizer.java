@@ -62,7 +62,7 @@ public class Tokenizer {
         // 解析存储的字符串为无符号整数
         // 解析成功则返回无符号整数类型的token，否则返回编译错误
         try{
-            Integer res =Integer.parseInt(buffer.toString());
+            long res =Integer.parseInt(buffer.toString());
             // Token 的 Value 应填写数字的值
             return new Token(TokenType.UINT_LITERAL, res, now, it.currentPos());
         }catch (Exception e){

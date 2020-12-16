@@ -1,18 +1,25 @@
 package miniplc0java.analyser;
 
+import miniplc0java.instruction.Instruction;
+import miniplc0java.instruction.Operation;
+
+import java.util.ArrayList;
+
 public class Function {
     //参数个数
-    int paramNum;
+    public int paramNum;
     //该函数在全局变量的位置
-    int globalNum;
+    public int globalNum;
     //局部变量个数
-    int localNum;
+    public int localNum;
     //return的函数类型
-    int returnType;
+    public int returnType;
     //在函数列表里的位置
-    int funcNum;
+    public int funcNum;
     //是不是内置函数
-    boolean isInner;
+    public boolean isInner;
+    //操作列表
+    ArrayList<Instruction> operations = new ArrayList<>();
 
     public Function(int paramNum, int globalNum, int localNum, int returnType, int funcNum, boolean isInner) {
         this.paramNum = paramNum;
@@ -21,5 +28,13 @@ public class Function {
         this.returnType = returnType;
         this.funcNum = funcNum;
         this.isInner = isInner;
+    }
+
+    public ArrayList<Instruction> getOperations(){
+        return this.operations;
+    }
+
+    public void addOperations(Instruction operation){
+        this.operations.add(operation);
     }
 }

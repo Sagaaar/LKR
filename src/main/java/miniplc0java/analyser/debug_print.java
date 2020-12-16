@@ -38,9 +38,9 @@ public class debug_print {
             }
             else if(exprTokens.get(i).type==ExpressionType.FUNC){
                 System.out.print(exprTokens.get(i).type+" ");
-                for(int j=0;j<((callFunc) (exprTokens.get(i))).param.size();j++){
+                for(int j = 0; j<((CallFunc) (exprTokens.get(i))).param.size(); j++){
                     System.out.print("( ");
-                    print_expr(((callFunc) (exprTokens.get(i))).param.get(j),false);
+                    print_expr(((CallFunc) (exprTokens.get(i))).param.get(j),false);
                     System.out.print(") ");
                 }
             }else{

@@ -1,16 +1,13 @@
 package miniplc0java;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import miniplc0java.analyser.Analyser;
+import miniplc0java.analyser.Function;
+import miniplc0java.analyser.StackVar;
 import miniplc0java.error.CompileError;
 import miniplc0java.instruction.Instruction;
 import miniplc0java.tokenizer.StringIter;
@@ -104,11 +101,92 @@ public class App {
             } catch (Exception e) {
                 // 遇到错误不输出，直接退出
                 System.err.println(e);
-                System.exit(1);
+                System.exit(0);
                 return;
             }
-            for (Instruction instruction : instructions) {
-                output.println(instruction.toString());
+            //----------------------------------
+
+//            output.println("72303b3e");
+//            output.println("00000001");
+            System.out.println(String.format("%08x", analyzer.leftP + 1));
+            for (int i = 0; i <= analyzer.leftP; i++) {//输出全局变量
+                StackVar tmp = analyzer.stackLeft[i];
+                if (tmp.isConst)
+                    System.out.println("01");
+                else {
+                    System.out.println("00");
+                }
+                if (tmp.isFunction) {
+                    String name = tmp.name;
+                    System.out.println(String.format("%08x", name.length()));
+                    for (int j = 0; j < name.length(); j++) {
+                        StringBuilder str = new StringBuilder();
+                        char ch=name.charAt(j);
+                        if(ch == '\\') {
+                            j++;
+                            ch = name.charAt(j);
+                            if (ch == 'n') {
+                                ch = '\n';
+                            } else if (ch == '\\') {
+                                ch = '\\';
+                            } else if (ch == 't') {
+                                ch = '\t';
+                            } else if (ch == 'r') {
+                                ch = '\r';
+                            }
+                        }
+                        str.append(ch);
+                        System.out.print(str);
+                    }
+                    System.out.print('\n');
+                } else {
+                    System.out.println("00000008");
+                    System.out.println("0000000000000000");
+                }
+            }
+            System.out.println(String.format("%08x", analyzer.funcP + 1));
+            for (int i = 0; i <= analyzer.funcP; i++) {
+                Function tmp = analyzer.funcList[i];
+//                output.println(String.format("%08x", tmp.global_num));
+//                if(tmp.return_num!=3){
+//                    output.println(String.format("%08x", 1));
+//                }else{
+//                    output.println(String.format("%08x", 0));
+//                }
+//                output.println(String.format("%08x", tmp.args_num));
+//                output.println(String.format("%08x", tmp.locals_num));
+//                output.println(String.format("%08x", tmp.getOperations().size()));
+                System.out.println("("+tmp.funcNum+")");
+                StringBuilder str=new StringBuilder().append("fn [").append(tmp.globalNum).append("] ")
+                        .append(tmp.localNum).append(" ").append(tmp.paramNum).append(" -> ");
+                if(tmp.returnType!=2){
+                    str.append(1);
+                }else{
+                    str.append(0);
+                }
+                System.out.println(str+" {");
+                ArrayList<Instruction> ops=tmp.getOperations();
+                for(int j=0;j<ops.size();j++){
+                    System.out.println(String.format("     %d:%s",j,ops.get(j)));
+                }
+                System.out.println("}");
+            }
+            DataOutputStream out = null;
+            try {
+                out = new DataOutputStream(new FileOutputStream(new File(outputFileName)));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            PrintToBinary p_to_byte = new PrintToBinary();
+            List<Byte> tmp_byte_list = p_to_byte.output_print(analyzer);
+            byte[] tmp_byte = new byte[tmp_byte_list.size()];
+            for(int i = 0; i < tmp_byte_list.size(); i++)
+                tmp_byte[i] = tmp_byte_list.get(i);
+            try {
+                assert out != null;
+                out.write(tmp_byte);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         } else {
             System.err.println("Please specify either '--analyse' or '--tokenize'.");

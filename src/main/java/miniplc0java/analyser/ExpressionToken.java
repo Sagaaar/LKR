@@ -20,11 +20,11 @@ class Uinteger extends ExpressionToken{
 }
 
 //函数名
-class callFunc extends ExpressionToken{
+class CallFunc extends ExpressionToken{
     ArrayList<ArrayList<ExpressionToken>> param = new ArrayList<ArrayList<ExpressionToken>>();
     Function function;
 
-    public callFunc(ExpressionType type, Function function) {
+    public CallFunc(ExpressionType type, Function function) {
         super(type);
         this.function = function;
     }
