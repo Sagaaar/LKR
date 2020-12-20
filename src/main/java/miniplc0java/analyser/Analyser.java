@@ -880,7 +880,7 @@ public final class Analyser {
 //                debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
                 transExpr(MidToLast.midToLast(exprToken[callFuncP]));
                 //br
-                Instruction elseIfBr = new Instruction(Operation.br);
+                Instruction elseIfBr = new Instruction(Operation.br,0);
                 currentFunc.addOperations(new Instruction(Operation.br_true, 1));
                 currentFunc.addOperations(elseIfBr);
                 int cntBr_2 = currentFunc.operations.size();
