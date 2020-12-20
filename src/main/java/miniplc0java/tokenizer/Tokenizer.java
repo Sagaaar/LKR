@@ -5,6 +5,7 @@ import miniplc0java.error.ErrorCode;
 import miniplc0java.util.Pos;
 
 import javax.lang.model.type.TypeKind;
+import java.util.regex.Pattern;
 
 public class Tokenizer {
 
@@ -43,10 +44,74 @@ public class Tokenizer {
         else if(peek == '"'){
             return lexString();
         }
+        else if(peek == '\''){
+            return lexChar();
+        }
         else {
             return lexOperatorOrUnknown();
         }
     }
+
+    //char判断
+    private Token lexChar() throws TokenizeError{
+        Pos now = it.currentPos();
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(it.nextChar());
+        //标识转义
+        Boolean isLanguage = false;
+        //判断转义
+        while(!it.isEOF()){
+            //结尾单引号
+            if (it.peekChar() == '\'' && !isLanguage) {
+                break;
+            }
+            //如果是右斜杠
+            if(it.peekChar() == '\\'){
+                if(isLanguage){
+                    isLanguage = false;
+                }
+                else{
+                    isLanguage = true;
+                }
+            }
+            else{
+                isLanguage = false;
+            }
+            buffer.append(it.nextChar());
+        }
+        if(it.peekChar()=='\''){
+            buffer.append(it.nextChar());
+        }
+        String pattern = "\'([^'\\\\]|(\\\\[\\\\\"'ntr]))\'";
+        Boolean match = Pattern.matches(pattern,buffer);
+        if(match){
+            int num;
+            String str = buffer.substring(1,buffer.length()-1);
+            if(str.length()==1){
+                num = (int)str.charAt(0);
+            }
+            else{
+                if(str.charAt(1) == 'n'){
+                    num = (int)'\n';
+                }
+                else if(str.charAt(1) == 'r'){
+                    num = (int)'\r';
+                }
+                else if(str.charAt(1) == 't'){
+                    num = (int)'\t';
+                }
+                else{
+                    num = (int)str.charAt(1);
+                }
+            }
+            return new Token(TokenType.UINT_LITERAL,(long)num,now,it.currentPos());
+        }
+        else{
+            throw new TokenizeError(ErrorCode.InvalidChar,now);
+        }
+    }
+
+
     //无符号整数判断
     private Token lexUInt() throws TokenizeError {
         Pos now = it.currentPos();
