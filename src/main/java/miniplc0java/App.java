@@ -108,9 +108,9 @@ public class App {
 
 //            output.println("72303b3e");
 //            output.println("00000001");
-            System.out.println(String.format("%08x", analyzer.leftP + 1));
-            for (int i = 0; i <= analyzer.leftP; i++) {//输出全局变量
-                StackVar tmp = analyzer.stackLeft[i];
+            System.out.println(String.format("%08x", analyzer.globalP + 1));
+            for (int i = 0; i <= analyzer.globalP; i++) {//输出全局变量
+                StackVar tmp = analyzer.globalVar[i];
                 if (tmp.isConst)
                     System.out.println("01");
                 else {

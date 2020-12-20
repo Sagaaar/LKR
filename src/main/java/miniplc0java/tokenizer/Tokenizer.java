@@ -123,8 +123,10 @@ public class Tokenizer {
             it.nextChar();
         }
         String pattern="\"(([^\"\\\\])|(\\\\[\\\\\"'nrt]))*\"";
+        String str = buffer.substring(1,buffer.length()-1);
+
         if(buffer.toString().matches(pattern)){
-            return new Token(TokenType.STRING_LITERAL,buffer.toString(),now, it.currentPos());
+            return new Token(TokenType.STRING_LITERAL,str,now, it.currentPos());
         }
         else{
             throw new TokenizeError(ErrorCode.StringError, now);

@@ -32,6 +32,8 @@ public final class Analyser {
     Map<String, Function> funcMap = new HashMap<String, Function>();
     int checkExprType = 0;
     Boolean isSingleFunc = false;
+    public StackVar[] globalVar = new StackVar[1000];
+    public int globalP = -1;
 
     /**
      * 当前偷看的 token
@@ -269,14 +271,23 @@ public final class Analyser {
     public void initialStack() {
         stackRight[++rightP] = new StackPoint(true, 0);
         stackLeft[++leftP] = new StackVar(true, true, true, "getint", 1, new TypeAndPos(1, 0));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "getdouble", 3, new TypeAndPos(1, 1));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "getchar", 1, new TypeAndPos(1, 2));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "putint", 2, new TypeAndPos(1, 3));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "putdouble", 2, new TypeAndPos(1, 4));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "putchar", 2, new TypeAndPos(1, 5));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "putstr", 2, new TypeAndPos(1, 6));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "putln", 2, new TypeAndPos(1, 7));
+        globalVar[++globalP] = stackLeft[leftP];
         stackLeft[++leftP] = new StackVar(true, true, true, "_start", 2, new TypeAndPos(1, 8));
+        globalVar[++globalP] = stackLeft[leftP];
         funcList[++funcP] = new Function(0, 8, 0, 2, 0, false);
         funcMap.put("getint", new Function(0, 0, 0, 1, -1, true));
         funcMap.put("getdouble", new Function(0, 1, 0, 3, -1, true));
@@ -323,8 +334,10 @@ public final class Analyser {
         expect(TokenType.CONST_KW);
         Token token = expect(TokenType.IDENT);
         TypeAndPos typeAndPos = null;
+//        全局变量
         if (rightP == 0) {
-            typeAndPos = new TypeAndPos(1, leftP);
+            typeAndPos = new TypeAndPos(1, globalP+1);
+            globalVar[++globalP] = stackLeft[leftP];
         } else {
             typeAndPos = new TypeAndPos(2, cntLocal);
             cntLocal++;
@@ -572,7 +585,9 @@ public final class Analyser {
         }
         //STRING_LITERAL
         else if (check(TokenType.STRING_LITERAL)) {
-            expect(TokenType.STRING_LITERAL);
+            Token token = expect(TokenType.STRING_LITERAL);
+            globalVar[++globalP] = new StackVar(true,true,true,token.getValueString(),0,(new TypeAndPos(1,globalP)));
+            exprToken[callFuncP].add(new Uinteger(ExpressionType.UINT_LITERAL,(long)globalP));
             return true;
         }
         return false;
@@ -617,14 +632,16 @@ public final class Analyser {
         Token token = expect(TokenType.IDENT);
         TypeAndPos typeAndPos;
         if (rightP == 0) {
-            typeAndPos = new TypeAndPos(1, leftP + 1);
+            typeAndPos = new TypeAndPos(1, globalP + 1);
         } else {
             typeAndPos = new TypeAndPos(2, cntLocal);
             cntLocal++;
         }
         addSymbol(token.getValueString(), false, false, false, token.getStartPos(), 1, typeAndPos);
+//        全局变量
         if (rightP == 0) {
             stackLeft[leftP].isInitialized = true;
+            globalVar[++globalP] = stackLeft[leftP];
         }
         expect(TokenType.COLON);
         int varType = analyseTyParam();
@@ -651,7 +668,7 @@ public final class Analyser {
         expect(TokenType.FN_KW);
         //把函数名入栈
         Token token = expect(TokenType.IDENT);
-        TypeAndPos typeAndPos = new TypeAndPos(1, leftP + 1);
+        TypeAndPos typeAndPos = new TypeAndPos(1, globalP + 1);
         //如果找到了fn
         if (funcMap.get(token.getValueString()) != null) {
             throw new AnalyzeError(ErrorCode.DuplicateDeclaration, token.getStartPos());
@@ -659,6 +676,7 @@ public final class Analyser {
         //如果没有找到fn
         else {
             addSymbol(token.getValueString(), false, true, true, token.getStartPos(), 0, typeAndPos);
+            globalVar[++globalP] = stackLeft[leftP];
         }
         //把新的func入栈
         cntParam = 0;

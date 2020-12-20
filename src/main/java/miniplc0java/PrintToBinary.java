@@ -30,10 +30,10 @@ public class PrintToBinary {
     //version
     output_bytes.addAll(four_int_byte(4, 1));
     //globals.count
-    output_bytes.addAll(four_int_byte(4, analyzer.leftP+1));
+    output_bytes.addAll(four_int_byte(4, analyzer.globalP+1));
     //
-    for(int i = 0; i <= analyzer.leftP; i++){
-      StackVar tmp_symbol = analyzer.stackLeft[i];
+    for(int i = 0; i <= analyzer.globalP; i++){
+      StackVar tmp_symbol = analyzer.globalVar[i];
       if(tmp_symbol.isConst)
         output_bytes.addAll(four_int_byte(1, 1));
       else
@@ -45,7 +45,7 @@ public class PrintToBinary {
       }
       //函数
       else{
-        StackVar tmp_func = analyzer.stackLeft[i];
+        StackVar tmp_func = analyzer.globalVar[i];
         assert tmp_func != null;
         String str=tmp_func.name;
         int length=0;
