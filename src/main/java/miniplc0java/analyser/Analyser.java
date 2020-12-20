@@ -613,7 +613,6 @@ public final class Analyser {
      * let_decl_stmt -> 'let' IDENT ':' ty ('=' expr)? ';'
      */
     private void analyseLetDeclStmt() throws CompileError {
-        Boolean isInitialized = false;
         expect(TokenType.LET_KW);
         Token token = expect(TokenType.IDENT);
         TypeAndPos typeAndPos;
@@ -630,6 +629,7 @@ public final class Analyser {
         expect(TokenType.COLON);
         int varType = analyseTyParam();
         checkExprType = varType;
+        varTop = stackLeft[leftP];
         if (!check(TokenType.SEMICOLON)) {
             getAddress(typeAndPos);
             expect(TokenType.ASSIGN);
@@ -638,12 +638,10 @@ public final class Analyser {
 //            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
             transExpr(MidToLast.midToLast(exprToken[callFuncP]));
             currentFunc.addOperations(new Instruction(Operation.store_64));
-            isInitialized = true;
+            varTop.isInitialized = true;
         }
         expect(TokenType.SEMICOLON);
-        varTop = stackLeft[leftP];
         varTop.type = varType;
-        varTop.isInitialized = isInitialized;
     }
 
     /**
