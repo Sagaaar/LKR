@@ -812,7 +812,7 @@ public final class Analyser {
             currentFunc.addOperations(new Instruction(Operation.store_64));
 //            debug_print.print_expr(MidToLast.midToLast(exprToken[callFuncP]), true);
             if (currentFunc.returnType != 1) {
-                System.out.println(stackLeft[currentFunc.globalNum].name);
+//                System.out.println(stackLeft[currentFunc.globalNum].name);
                 throw new AnalyzeError(ErrorCode.InvalidReturnType, token.getStartPos());
             }
         }
@@ -937,7 +937,7 @@ public final class Analyser {
             else if (exprToken.type == ExpressionType.FUNC) {
                 CallFunc callfunc = (CallFunc) exprToken;
                 Function tmpFunc = callfunc.function;
-                System.out.println(tmpFunc);
+//                System.out.println(tmpFunc);
                 //如果返回值是void,需要预留空间
                 if (tmpFunc.returnType == 2) {
                     currentFunc.addOperations(new Instruction(Operation.stackalloc, 0));
