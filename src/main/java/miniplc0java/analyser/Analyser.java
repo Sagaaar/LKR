@@ -770,7 +770,20 @@ public final class Analyser {
             analyseWhileStmt();
         }
         //break_stmt
+        else if(check(TokenType.Break)){
+            expect(TokenType.Break);
+            Instruction opt = new Instruction(Operation.br, currentFunc.getOperations().size());
+            currentFunc.addOperations(opt);
+            whileList[whileTop].brList.add(opt);
+            expect(TokenType.SEMICOLON);
+        }
         //continue_stmt
+        else if(check(TokenType.Continue)){
+            expect(TokenType.Continue);
+            Instruction opt = new Instruction(Operation.br, whileList[whileTop].size-currentFunc.getOperations().size());
+            currentFunc.addOperations(opt);
+            expect(TokenType.SEMICOLON);
+        }
         //return_stmt
         else if (check(TokenType.RETURN_KW)) {
             analyseReturnStmt();
@@ -844,6 +857,8 @@ public final class Analyser {
         expect(TokenType.SEMICOLON);
     }
 
+    WhileBr[] whileList = new WhileBr[1000];
+    int whileTop = -1;
     /**
      * while_stmt -> 'while' expr block_stmt
      */
@@ -851,6 +866,7 @@ public final class Analyser {
         expect(TokenType.WHILE_KW);
         exprToken[callFuncP].clear();
         int cnt = currentFunc.operations.size();
+        whileList[++whileTop] = new WhileBr(cnt);
         currentFunc.addOperations(new Instruction(Operation.br, 0));
         analyseExpr();
         transExpr(MidToLast.midToLast(exprToken[callFuncP]));
@@ -861,6 +877,10 @@ public final class Analyser {
         analyseBlockStmt();
         whileBr.setArg1(currentFunc.operations.size() - whileBr.arg1);
         currentFunc.addOperations(new Instruction(Operation.br, cnt - currentFunc.operations.size()));
+        for(Instruction opt: whileList[whileTop].brList){
+            opt.setArg1(currentFunc.getOperations().size()-opt.arg1-1);
+        }
+        whileTop--;
     }
 
     ArrayList<Instruction> brs = new ArrayList<Instruction>();

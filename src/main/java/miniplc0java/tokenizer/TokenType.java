@@ -69,6 +69,10 @@ public enum TokenType {
     COLON,
     /**注释**/
     COMMENT,
+    /*Break*/
+    Break,
+    /*Continue*/
+    Continue,
     /** 文件尾 */
     EOF;
 
@@ -141,6 +145,10 @@ public enum TokenType {
                 return "void";
             case INTEGER:
                 return "integer";
+            case Break:
+                return "break";
+            case Continue:
+                return "continue";
             case EOF:
                 return "EOF";
             default:

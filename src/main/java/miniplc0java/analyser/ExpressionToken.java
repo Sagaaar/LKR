@@ -1,5 +1,7 @@
 package miniplc0java.analyser;
 
+import miniplc0java.instruction.Instruction;
+
 import java.util.ArrayList;
 
 public class ExpressionToken {
@@ -41,5 +43,14 @@ class Var extends ExpressionToken{
     public Var(ExpressionType type, StackVar varValue) {
         super(type);
         this.varValue = varValue;
+    }
+}
+
+//while
+class WhileBr{
+    ArrayList<Instruction> brList = new ArrayList<Instruction>();
+    int size;
+    WhileBr(int size){
+        this.size = size;
     }
 }

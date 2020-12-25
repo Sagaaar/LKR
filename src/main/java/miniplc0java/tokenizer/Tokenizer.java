@@ -318,6 +318,12 @@ public class Tokenizer {
         else if(word.equals("void")){
             return TokenType.VOID;
         }
+        else if(word.equals("break")){
+            return TokenType.Break;
+        }
+        else if(word.equals("continue")){
+            return TokenType.Continue;
+        }
         else{
             return TokenType.None;
         }
